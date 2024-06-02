@@ -2,6 +2,7 @@ package com.aluracursos.screenmatch.principal;
 
 import com.aluracursos.screenmatch.model.DatosSerie;
 import com.aluracursos.screenmatch.model.DatosTemporadas;
+import com.aluracursos.screenmatch.model.Episodio;
 import com.aluracursos.screenmatch.repository.SerieRepository;
 import com.aluracursos.screenmatch.service.ConsumoAPI;
 import com.aluracursos.screenmatch.service.ConvierteDatos;
@@ -19,6 +20,8 @@ public class Principal {
     private ConvierteDatos conversor = new ConvierteDatos();
     private List<DatosSerie> datosSeries =new ArrayList<>();
     private SerieRepository repositorio;
+
+    private List<Serie> series;
 
     public Principal(SerieRepository repository) {
         this.repositorio = repository;
@@ -70,15 +73,31 @@ public class Principal {
         return datos;
     }
     private void buscarEpisodioPorSerie() {
-        DatosSerie datosSerie = getDatosSerie();
-        List<DatosTemporadas> temporadas = new ArrayList<>();
+        mostrarSeriesBuscadas();
+        System.out.println("De que seria quieres ver sus episodios");
+        var nombre = teclado.nextLine();
+        Optional<Serie> serie = series.stream()
+                .filter(s->s.getTitulo().toLowerCase().contains(nombre.toLowerCase()))
+                .findFirst();
+        if(serie.isPresent()){
+            var serieEncontrada = serie.get();
+            List<DatosTemporadas> temporadas = new ArrayList<>();
 
-        for (int i = 1; i <= datosSerie.totalTemporadas(); i++) {
-            var json = consumoApi.obtenerDatos(URL_BASE + datosSerie.titulo().replace(" ", "+") + "&season=" + i + API_KEY);
-            DatosTemporadas datosTemporada = conversor.obtenerDatos(json, DatosTemporadas.class);
-            temporadas.add(datosTemporada);
+            for (int i = 1; i <= serieEncontrada.getTotalTemporadas(); i++) {
+                var json = consumoApi.obtenerDatos(URL_BASE + serieEncontrada.getTitulo().replace(" ", "+") + "&season=" + i + API_KEY);
+                DatosTemporadas datosTemporada = conversor.obtenerDatos(json, DatosTemporadas.class);
+                temporadas.add(datosTemporada);
+            }
+            temporadas.forEach(System.out::println);
+            //Convierto la lista de DatosTemporadas en  unan lista unica
+            List<Episodio> episodios = temporadas.stream()
+                    .flatMap(d->d.episodios().stream()
+                            .map(e->new Episodio(d.numero(),e)))
+                    .collect(Collectors.toList());
+            serieEncontrada.setEpisodios(episodios);
+            repositorio.save(serieEncontrada);
         }
-        temporadas.forEach(System.out::println);
+
     }
     private void buscarSerieWeb() {
         DatosSerie datos = getDatosSerie();
@@ -90,11 +109,11 @@ public class Principal {
         System.out.println(datos);
     }
     private void mostrarSeriesBuscadas() {
-        datosSeries.forEach(System.out::println);
-        List<Serie> series = repositorio.findAll();
-         series.stream()
-                 .sorted(Comparator.comparing(Serie::getGenero))
-                 .forEach(System.out::println);
+       // datosSeries.forEach(System.out::println);
+        series = repositorio.findAll();
+        series.stream()
+                .sorted(Comparator.comparing(Serie::getGenero))
+                .forEach(System.out::println);
     }
 }
 
