@@ -18,6 +18,7 @@ public class Principal {
     private SerieRepository repositorio;
 
     private List<Serie> series;
+    private Optional<Serie> serieBuscada;
 
     public Principal(SerieRepository repository) {
         this.repositorio = repository;
@@ -34,6 +35,8 @@ public class Principal {
                     5 - Top5 mejores pelicuas
                     6 - Buscar series por categoria
                     7 - Filtrar series por Num de temporadas y evaluacion
+                    8 - Buscar episodios por titulos
+                    9 - Top Episodios
                                   
                     0 - Salir
                     """;
@@ -62,6 +65,11 @@ public class Principal {
                     break;
                 case 7 :
                     filtrarSeriePorTemporadaEvaluacion();
+                    break;
+                case 8:
+                    buscarEpisodiosPorTitulo();
+                case 9:
+                    top5EpisodiosPorSeries();
                 case 0:
                     System.out.println("Cerrando la aplicación...");
                     break;
@@ -121,7 +129,7 @@ public class Principal {
         System.out.println(datos);
     }
     private void mostrarSeriesBuscadas() {
-       // datosSeries.forEach(System.out::println);
+        // datosSeries.forEach(System.out::println);
         series = repositorio.findAll();
         series.stream()
                 .sorted(Comparator.comparing(Serie::getGenero))
@@ -130,7 +138,7 @@ public class Principal {
     private void buscarSeriePortitulo() {
         System.out.println("Escribe el nombre d ela seria que deseas buscar");
         var nombreSerie = teclado.nextLine();
-        Optional<Serie> serieBuscada = repositorio.findByTituloContainsIgnoreCase(nombreSerie);
+        serieBuscada = repositorio.findByTituloContainsIgnoreCase(nombreSerie);
         //Optional<Serie> serieBuscada = repositorio.buscar(nombreSerie);
 
         if (serieBuscada.isPresent()) {
@@ -163,6 +171,21 @@ public class Principal {
         List<Serie> seriesFiltradas = repositorio.seriesPorTemporadaYEvaluacion(numTemporadaQue,numEvaluacionQue);
         System.out.println("***Series Filtradas");
         seriesFiltradas.forEach(e-> System.out.println(e));
+    }
+
+    private void buscarEpisodiosPorTitulo() {
+        System.out.println("Escribe el nombre del episo que deseas buscar");
+        var nombreEpisodio  =teclado.nextLine();
+        List<Episodio> episodiosEncontrados  = repositorio.episodiosPorNombre(nombreEpisodio);
+        episodiosEncontrados.forEach(System.out::println);
+    }
+    private void top5EpisodiosPorSeries() {
+        buscarSeriePortitulo();
+        if(serieBuscada.isPresent()){
+            Serie serie = serieBuscada.get();
+            List<Episodio> topEpisodios = repositorio.top5Episodios(serie);
+            topEpisodios.forEach(System.out::println);
+        }
     }
 }
 
