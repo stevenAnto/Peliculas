@@ -1,16 +1,12 @@
 package com.aluracursos.screenmatch.principal;
 
-import com.aluracursos.screenmatch.model.DatosSerie;
-import com.aluracursos.screenmatch.model.DatosTemporadas;
-import com.aluracursos.screenmatch.model.Episodio;
+import com.aluracursos.screenmatch.model.*;
 import com.aluracursos.screenmatch.repository.SerieRepository;
 import com.aluracursos.screenmatch.service.ConsumoAPI;
 import com.aluracursos.screenmatch.service.ConvierteDatos;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.aluracursos.screenmatch.model.Serie;
 
 public class Principal {
     private Scanner teclado = new Scanner(System.in);
@@ -36,6 +32,8 @@ public class Principal {
                     3 - Mostrar series buscadas
                     4 - Buscar serie por titulo
                     5 - Top5 mejores pelicuas
+                    6 - Buscar series por categoria
+                    7 - Filtrar series por Num de temporadas y evaluacion
                                   
                     0 - Salir
                     """;
@@ -55,8 +53,15 @@ public class Principal {
                     break;
                 case 4 :
                     buscarSeriePortitulo();
+                    break;
                 case 5:
                     buscarTop5Series();
+                    break;
+                case 6:
+                    buscarSeriesPorCategoria();
+                    break;
+                case 7 :
+                    filtrarSeriePorTemporadaEvaluacion();
                 case 0:
                     System.out.println("Cerrando la aplicación...");
                     break;
@@ -140,6 +145,26 @@ public class Principal {
         topSeries.forEach(s-> System.out.println("Serie "+s.getTitulo()+
                 " Evaluacion "+s.getEvaluacion()));
 
+    }
+    private void buscarSeriesPorCategoria() {
+        System.out.println("escribe el genero/categoria de la seria que desa buscar");
+        var categoriaBuscaria  = teclado.nextLine();
+        var categoria = Categoria.fromEspaniol(categoriaBuscaria);
+        List<Serie> seriesPorCategorias = repositorio.findByGenero(categoria);
+        System.out.println("Las series de categorai "+categoriaBuscaria);
+        seriesPorCategorias.forEach(s-> System.out.println(s));
+    }
+    private void filtrarSeriePorTemporadaEvaluacion() {
+        System.out.println("Ingrese el numero de temproada");
+        var numTemporadaQue = teclado.nextInt();
+        teclado.nextLine();
+        System.out.println("Ingrese el numero de evaluacion");
+        var numEvaluacionQue = teclado.nextDouble();
+        List<Serie> seriesFiltradas = repositorio.findByTotalTemporadasLessThanEqualAndEvaluacionLessThanEqual(
+                numTemporadaQue,numEvaluacionQue
+        );
+        System.out.println("***Series Filtradas");
+        seriesFiltradas.forEach(e-> System.out.println(e));
     }
 }
 
