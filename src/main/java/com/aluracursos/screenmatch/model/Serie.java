@@ -3,6 +3,7 @@ package com.aluracursos.screenmatch.model;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.OptionalDouble;
 
 @Entity
@@ -12,17 +13,31 @@ public class Serie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long Id;
     @Column(unique = true)
-    String titulo;
-    Integer totalTemporadas;
-    Double evaluacion;
-    String poster;
+    private String titulo;
+    private Integer totalTemporadas;
+    private Double evaluacion;
+    private String poster;
     //Mapeamos a enum
     @Enumerated(EnumType.STRING)
-    Categoria genero;
-    String actores;
-    String sinopsis;
+    private Categoria genero;
+    private String actores;
+    private String sinopsis;
+    @OneToMany(mappedBy = "serie")
+    public List<Episodio> episodios;
 
     public Serie() {
+
+    }
+    public Serie(DatosSerie datosSerie){
+        this.titulo = datosSerie.titulo();
+        this.totalTemporadas = datosSerie.totalTemporadas();
+        this.evaluacion = OptionalDouble.of(Double.valueOf(
+                datosSerie.evaluacion()
+        )).orElse(0.0);
+        this.poster = datosSerie.poster();
+        this.genero = Categoria.fromString(datosSerie.genero().split(
+                ",")[0].trim());
+        this.sinopsis = datosSerie.sinopsis();
 
     }
 
@@ -102,16 +117,5 @@ public class Serie {
                 ", sinopsis='" + sinopsis + '\'';
     }
 
-    public Serie(DatosSerie datosSerie){
-        this.titulo = datosSerie.titulo();
-        this.totalTemporadas = datosSerie.totalTemporadas();
-        this.evaluacion = OptionalDouble.of(Double.valueOf(
-                datosSerie.evaluacion()
-        )).orElse(0.0);
-        this.poster = datosSerie.poster();
-        this.genero = Categoria.fromString(datosSerie.genero().split(
-                ",")[0].trim());
-        this.sinopsis = datosSerie.sinopsis();
 
-    }
 }
