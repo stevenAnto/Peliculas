@@ -22,7 +22,7 @@ public class Serie {
     private Categoria genero;
     private String actores;
     private String sinopsis;
-    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     public List<Episodio> episodios;
 
     public Serie() {
@@ -123,7 +123,8 @@ public class Serie {
                 ", evaluacion=" + evaluacion +
                 ", poster='" + poster + '\'' +
                 ", actores='" + actores + '\'' +
-                ", sinopsis='" + sinopsis + '\'';
+                ", sinopsis='" + sinopsis + '\''
+                +", episodios= "+episodios;
     }
 
 
