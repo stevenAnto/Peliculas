@@ -160,9 +160,7 @@ public class Principal {
         teclado.nextLine();
         System.out.println("Ingrese el numero de evaluacion");
         var numEvaluacionQue = teclado.nextDouble();
-        List<Serie> seriesFiltradas = repositorio.findByTotalTemporadasLessThanEqualAndEvaluacionLessThanEqual(
-                numTemporadaQue,numEvaluacionQue
-        );
+        List<Serie> seriesFiltradas = repositorio.seriesPorTemporadaYEvaluacion(numTemporadaQue,numEvaluacionQue);
         System.out.println("***Series Filtradas");
         seriesFiltradas.forEach(e-> System.out.println(e));
     }
